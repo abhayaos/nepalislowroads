@@ -140,32 +140,21 @@ export class DashainManager {
     this.poleMesh.setMatrixAt(i * 2 + 1, this.dummy.matrix);
 
     const pos = this.wires[i].geometry.attributes.position;
+    const sagY = (f) => ly + (ry - ly) * f + poleH - 0.25 - 1.7 * Math.sin(Math.PI * f);
     for (let j = 0; j < BULBS_PER_SPAN; j++) {
       const f = BULBS_PER_SPAN === 1 ? 0.5 : j / (BULBS_PER_SPAN - 1);
       const x = lx + (rx - lx) * f;
-      const baseY = ly + (ry - ly) * f;
-      const y = baseY + poleH - 0.25 - 1.7 * Math.sin(Math.PI * f);
       const idx = i * BULBS_PER_SPAN + j;
-      this.dummy.position.set(x, y, s.z);
+      this.dummy.position.set(x, sagY(f), s.z);
       this.dummy.scale.setScalar(1);
       this.dummy.rotation.set(0, 0, 0);
       this.dummy.updateMatrix();
       this.bulbMesh.setMatrixAt(idx, this.dummy.matrix);
-      // wire sample points (16 samples across the sag)
-      const w0 = Math.floor(f * 15);
-      pos.setXYZ(w0, x, y + 0.15, s.z);
     }
-    // fill any unset wire samples by interpolation
-    let last = -1;
+    // full 16-sample sag curve for the wire
     for (let k = 0; k < 16; k++) {
-      if (pos.getY(k) !== 0 || last === -1) { if (pos.getY(k) !== 0) last = k; continue; }
-    }
-    void last;
-    for (let k = 0; k < 16; k++) {
-      if (pos.getY(k) === 0) {
-        const f = k / 15;
-        pos.setXYZ(k, lx + (rx - lx) * f, ly + poleH - 0.1 - 1.7 * Math.sin(Math.PI * f), s.z);
-      }
+      const f = k / 15;
+      pos.setXYZ(k, lx + (rx - lx) * f, sagY(f) + 0.15, s.z);
     }
     pos.needsUpdate = true;
     this.poleMesh.instanceMatrix.needsUpdate = true;
