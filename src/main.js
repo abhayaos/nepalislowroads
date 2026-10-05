@@ -64,12 +64,42 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Ensure landscape orientation on mobile
+// Force landscape mode on mobile
+function forceLandscape() {
+  if (screen.orientation) {
+    screen.orientation.lock('landscape')
+      .then(() => {
+        // Successfully locked to landscape
+        enterFullscreen();
+      })
+      .catch(() => {
+        // Lock failed, try fullscreen instead
+        enterFullscreen();
+      });
+  } else {
+    enterFullscreen();
+  }
+}
+
+function enterFullscreen() {
+  const canvas = document.getElementById('game-canvas');
+  if (document.fullscreenElement) return;
+  if (canvas.requestFullscreen) {
+    canvas.requestFullscreen();
+  } else if (canvas.mozRequestFullScreen) { // Firefox
+    canvas.mozRequestFullScreen();
+  } else if (canvas.webkitRequestFullscreen) { // Chrome/Safari
+    canvas.webkitRequestFullscreen();
+  }
+}
+
+// Try to force landscape on load
+window.addEventListener('load', forceLandscape);
+
+// Handle orientation changes
 window.addEventListener('orientationchange', () => {
-  // Reset to landscape after orientation change
-  setTimeout(() => {
-    window.location.reload();
-  }, 100);
+  // Relock to landscape after orientation change
+  setTimeout(forceLandscape, 100);
 });
 
 window.addEventListener('keydown', (e) => {
