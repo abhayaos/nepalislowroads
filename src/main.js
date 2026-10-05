@@ -64,6 +64,14 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+// Ensure landscape orientation on mobile
+window.addEventListener('orientationchange', () => {
+  // Reset to landscape after orientation change
+  setTimeout(() => {
+    window.location.reload();
+  }, 100);
+});
+
 window.addEventListener('keydown', (e) => {
   const k = e.key.toLowerCase();
   if (k === 'w' || k === 'arrowup') keys.up = true;
